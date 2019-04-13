@@ -40,17 +40,28 @@ class Packet:
         self._data = data
     data = property(get_data, set_data)
 
-    def dataPacket2Str(self):
-        packet= 'r'+str(DATA_PACKET)+ str(self.len).zfill(SIZE_OF_BYTE)+str(self.seq)+ str(self.checksum).zfill(SIZE_OF_BYTE)+self.data
-        packet+='0' #TODO: changeit
-        return packet
+    def toString(self):
+        strPkt = 'r' + str(self.type).zfill(SIZE_OF_BYTE)
+        if (self.type == DATA_PACKET):
+            strPkt+= str(self.len).zfill(SIZE_OF_BYTE)+str(self.seq)+str(self.checksum).zfill(SIZE_OF_BYTE)+self.data
+        elif (self.type == ACK_PACKET):
+            strPkt+=  str(self.seq)+ str(self.checksum).zfill(SIZE_OF_BYTE)
+        elif (self.type== FIN_PACKET):
+            strPkt+= str(self.checksum).zfill(SIZE_OF_BYTE)
+        strPkt+= '0'
+        return strPkt
 
-    def ackPacket2Str(self):
-        packet = 'r' + str(ACK_PACKET) + str(self.seq)+ str(self.checksum).zfill(SIZE_OF_BYTE)
-        packet += '0'  # TODO: changeit
-        return packet
+    # def dataPacket2Str(self):
+    #     packet= 'r'+str(DATA_PACKET)+ str(self.len).zfill(SIZE_OF_BYTE)+str(self.seq)+ str(self.checksum).zfill(SIZE_OF_BYTE)+self.data
+    #     packet+='0' #TODO: changeit
+    #     return packet
 
-    def finPacket2Str (self):
-        packet = 'r' + str(FIN_PACKET)+str(self.checksum).zfill(SIZE_OF_BYTE)
-        packet += '0'  # TODO: changeit
-        return packet
+    # def ackPacket2Str(self):
+    #     packet = 'r' + str(ACK_PACKET) + str(self.seq)+ str(self.checksum).zfill(SIZE_OF_BYTE)
+    #     packet += '0'  # TODO: changeit
+    #     return packet
+
+    # def finPacket2Str (self):
+    #     packet = 'r' + str(FIN_PACKET)+str(self.checksum).zfill(SIZE_OF_BYTE)
+    #     packet += '0'  # TODO: changeit
+    #     return packet
