@@ -7,14 +7,14 @@ from packet.packet import *
 import time
 #from datetime import datetime
 
-def buildDataPacket(data, seq):
-    dataPkt = Packet()
-    dataPkt.seq = seq
-    dataPkt.len = len(data)
-    dataPkt.data = data
-    dataPkt.type = DATA_PACKET
-    dataPkt.checksum = calcCheckSum(dataPkt)
-    return dataPkt
+# def buildDataPacket(data, seq):
+#     dataPkt = Packet()
+#     dataPkt.seq = seq
+#     dataPkt.len = len(data)
+#     dataPkt.data = data
+#     dataPkt.type = DATA_PACKET
+#     dataPkt.checksum = calcCheckSum(dataPkt)
+#     return dataPkt
 
 def buildAckPacket(seq):
     ackPacket = Packet()
@@ -41,10 +41,11 @@ def segmentation(data):
             else:
                 part = data[i:i+MAX_PACKET_DIGITS_SIZE]
                 i+= MAX_PACKET_DIGITS_SIZE
-            packetsList.append(buildDataPacket(part, msg_counter%MAX_PACKET_DIGITS_SIZE))
+
+            packetsList.append(Packet(DATA_PACKET, len(part), msg_counter%MAX_PACKET_DIGITS_SIZE, part))
             msg_counter+=1
     else:
-        packetsList.append(buildDataPacket(data, msg_counter%MAX_PACKET_DIGITS_SIZE))
+        packetsList.append(Packet(DATA_PACKET, len(data), msg_counter % MAX_PACKET_DIGITS_SIZE, data))
         msg_counter += 1
     return packetsList
 
@@ -54,10 +55,14 @@ def sendAudioPacket(data, soundSend,soundRecv):
     for i in pktList:
         if (i.type == DATA_PACKET):
             print('send packet: '+str(i.seq))
+            soundRecv.stop_listening()
             soundSend.send(i.dataPacket2Str())
+            soundRecv.start_listening()
         elif (i.type== FIN_PACKET):
             print('send fin packet')
+            soundRecv.stop_listening()
             soundSend.send(i.finPacket2Str())
+            soundRecv.start_listening()
         soundRecv.start_listening()
         t0= time.perf_counter()
         while((soundRecv.recvPkt()==None)
@@ -66,7 +71,7 @@ def sendAudioPacket(data, soundSend,soundRecv):
               or(soundRecv.recvPkt().checksum != calcCheckSum(soundRecv.recvPkt()))):
             if (time.perf_counter()-t0 > RECV_TIMEOUT):
                 soundRecv.stop_listening()
-                soundSend.send(i.dataPacket2Str())
+                soundSend.send(i.dataPacket2Str()) #add also section to FIN_PACKET
                 soundRecv.start_listening()
                 t0= time.perf_counter()
             if (soundRecv.recvPkt()!=None and soundRecv.recvPkt().type==DATA_PACKET):
