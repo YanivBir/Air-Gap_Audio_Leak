@@ -63,36 +63,46 @@ class Decoder:
                     pointer+= TYPE_SIZE
                     if(type==ACK_PACKET):
                         if(len(bits_string)== ACK_PACKET_SIZE):
-                            ackPkt = Packet()
-                            ackPkt.type = ACK_PACKET
-                            ackPkt.seq = int(bits_string[pointer:pointer+SEQ_SIZE])
-                            pointer+= SEQ_SIZE
-                            ackPkt.checksum= int (bits_string[pointer:pointer+CHECKSUM_SIZE])
-                            #self.do_listen = False
-                            self.packet = ackPkt
-                            #self.closeChannel()
+                            # ackPkt = Packet()
+                            # ackPkt.type = ACK_PACKET
+                            # ackPkt.seq = int(bits_string[pointer:pointer+SEQ_SIZE])
+                            # pointer+= SEQ_SIZE
+                            # ackPkt.checksum= int (bits_string[pointer:pointer+CHECKSUM_SIZE])
+                            # self.packet = ackPkt
+                            self.packet = Packet(ACK_PACKET,None,0, int(bits_string[pointer:pointer+SEQ_SIZE]))
+                            pointer += SEQ_SIZE
+                            self.packet.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
+
                     elif(type==FIN_PACKET):
                         if(len(bits_string)==FIN_PACKET_SIZE):
-                            finPkt = Packet()
-                            finPkt.type = FIN_PACKET
-                            finPkt.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
-                            #self.do_listen = False
-                            self.packet = finPkt
+                            # finPkt = Packet()
+                            # finPkt.type = FIN_PACKET
+                            # finPkt.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
+                            # self.packet = finPkt
+
+                            self.packet = Packet(FIN_PACKET,None,0,int(bits_string[pointer:pointer + CHECKSUM_SIZE]))
                     elif(type==DATA_PACKET):
                         if(len(bits_string)> DATA_PACKET_SIZE):
                             length= int(bits_string[pointer:pointer+LEN_SIZE]) #The length field
                             pointer+= LEN_SIZE
                             if(length+ DATA_PACKET_SIZE==len(bits_string)):
-                                dataPkt = Packet()
-                                dataPkt.type = DATA_PACKET
-                                dataPkt.len = length
-                                dataPkt.seq = int(bits_string[pointer:pointer+SEQ_SIZE])
+                                # dataPkt = Packet()
+                                # dataPkt.type = DATA_PACKET
+                                # dataPkt.len = length
+                                # dataPkt.seq = int(bits_string[pointer:pointer+SEQ_SIZE])
+                                # pointer+= SEQ_SIZE
+                                # dataPkt.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
+                                # pointer+= CHECKSUM_SIZE
+                                # dataPkt.data = bits_string[pointer:pointer+length]
+                                # self.packet= dataPkt
+
+                                seq = int(bits_string[pointer:pointer + SEQ_SIZE])
                                 pointer+= SEQ_SIZE
-                                dataPkt.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
+                                checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                                 pointer+= CHECKSUM_SIZE
-                                dataPkt.data = bits_string[pointer:pointer+length]
-                                #self.do_listen = False
-                                self.packet= dataPkt
+                                data = bits_string[pointer:pointer + length]
+                                self.packet = Packet(DATA_PACKET, None, length, seq, data)
+                                self.packet.checksum = checksum
                     else:
                         self.bits_buffer=[]
             #self.closeChannel()

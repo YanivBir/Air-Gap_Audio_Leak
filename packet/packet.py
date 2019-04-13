@@ -2,12 +2,13 @@ from packet.packet_constants import *
 from packet.err_detection import *
 
 class Packet:
-    def __init__(self, type, len=0, seq=0, data=''):
+    def __init__(self, type,checksumFunc=None, len=0, seq=0, data=''):
         self._type =type
         self._len = len
         self._seq = seq
         self._data = data
-        self._checksum = calcCheckSum(self)
+        if (checksumFunc!=None):
+            self._checksum = checksumFunc(self)
 
     def get_type(self):
         return self._type

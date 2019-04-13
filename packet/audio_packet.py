@@ -16,18 +16,18 @@ import time
 #     dataPkt.checksum = calcCheckSum(dataPkt)
 #     return dataPkt
 
-def buildAckPacket(seq):
-    ackPacket = Packet()
-    ackPacket.seq = seq
-    ackPacket.type = ACK_PACKET
-    ackPacket.checksum = calcCheckSum(ackPacket)
-    return ackPacket
+# def buildAckPacket(seq):
+#     ackPacket = Packet()
+#     ackPacket.seq = seq
+#     ackPacket.type = ACK_PACKET
+#     ackPacket.checksum = calcCheckSum(ackPacket)
+#     return ackPacket
 
-def buildFinPacket():
-    finPacket = Packet()
-    finPacket.type = FIN_PACKET
-    finPacket.checksum = calcCheckSum(finPacket)
-    return finPacket
+# def buildFinPacket():
+#     finPacket = Packet()
+#     finPacket.type = FIN_PACKET
+#     finPacket.checksum = calcCheckSum(finPacket)
+#     return finPacket
 
 def segmentation(data):
     i = 0
@@ -42,16 +42,16 @@ def segmentation(data):
                 part = data[i:i+MAX_PACKET_DIGITS_SIZE]
                 i+= MAX_PACKET_DIGITS_SIZE
 
-            packetsList.append(Packet(DATA_PACKET, len(part), msg_counter%MAX_PACKET_DIGITS_SIZE, part))
+            packetsList.append(Packet(DATA_PACKET,calcCheckSum, len(part), msg_counter%MAX_PACKET_DIGITS_SIZE,part))
             msg_counter+=1
     else:
-        packetsList.append(Packet(DATA_PACKET, len(data), msg_counter % MAX_PACKET_DIGITS_SIZE, data))
+        packetsList.append(Packet(DATA_PACKET,calcCheckSum, len(data), msg_counter % MAX_PACKET_DIGITS_SIZE, data))
         msg_counter += 1
     return packetsList
 
 def sendAudioPacket(data, soundSend,soundRecv):
     pktList= segmentation(data)
-    pktList.append(buildFinPacket())
+    pktList.append(Packet(FIN_PACKET, calcCheckSum))
     for i in pktList:
         if (i.type == DATA_PACKET):
             print('send packet: '+str(i.seq))
@@ -109,13 +109,13 @@ def recvAudioPacket(soundSend,soundRecv):
             pktList.insert(seqNum, soundRecv.recvPkt())
             soundRecv.stop_listening()
             print('send ack for packet: ' + str(seqNum))
-            soundSend.send(buildAckPacket(seqNum).ackPacket2Str())
+            soundSend.send(Packet(ACK_PACKET, calcCheckSum, 0, seqNum).ackPacket2Str())
             soundRecv.start_listening()
     soundRecv.stop_listening()
 
     if (soundRecv.recvPkt().type==FIN_PACKET):
         print('get Fin packet')
-        soundSend.send(buildFinPacket().finPacket2Str())
+        soundSend.send(Packet(FIN_PACKET, calcCheckSum).finPacket2Str())
         print('send fin packet')
 
     data = ''
