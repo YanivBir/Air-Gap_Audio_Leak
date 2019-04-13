@@ -47,4 +47,4 @@ UNDEFINED_STATE = STATES-1
 BIT_DURATION = 0.2
 IDLE_LIMIT = 20 #If we don't hear anything for a while (~2sec), clear buffer.
 RECV_TIMEOUT = 120 #In sec
-VICTIM_AUD_FILE = '/home/yaniv/Desktop/AudioAlpha/tests/victimAudio'
+VICTIM_AUD_FILE = '/home/ofir/Desktop/AudioAlpha/tests/victimAudio'
