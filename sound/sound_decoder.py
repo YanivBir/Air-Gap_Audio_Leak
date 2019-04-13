@@ -66,7 +66,6 @@ class Decoder:
                             self.packet = Packet(ACK_PACKET,None,0, int(bits_string[pointer:pointer+SEQ_SIZE]))
                             pointer += SEQ_SIZE
                             self.packet.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
-
                     elif(type==FIN_PACKET):
                         if(len(bits_string)==FIN_PACKET_SIZE):
                             self.packet = Packet(FIN_PACKET)

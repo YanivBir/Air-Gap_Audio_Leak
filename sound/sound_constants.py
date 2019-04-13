@@ -29,7 +29,6 @@ SEVEN_THRESH=   100
 EIGHT_THRESH=   100
 NINE_THRESH=    100
 
-
 STATES= 12 #include reset and base states
 ZERO_STATE=  0
 ONE_STATE =  1
@@ -46,5 +45,5 @@ UNDEFINED_STATE = STATES-1
 
 BIT_DURATION = 0.2
 IDLE_LIMIT = 20 #If we don't hear anything for a while (~2sec), clear buffer.
-RECV_TIMEOUT = 120 #In sec
-VICTIM_AUD_FILE = '/home/yaniv/Desktop/AudioAlpha/tests/victimAudio'
+RECV_TIMEOUT = 7 #In sec
+VICTIM_AUD_FILE = '/home/yaniv/PycharmProjects/AudioAlpha/tests/victimAudio'

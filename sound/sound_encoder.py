@@ -6,6 +6,7 @@ from scipy.io import wavfile
 from sound.sound_constants import *
 from packet.packet_constants import *
 from packet.audio_packet import *
+from sound.sound_decoder import *
 
 class Encoder:
     def __init__(self):
@@ -89,8 +90,11 @@ class Encoder:
         stream.close()
         p.terminate()
 
-    def send (self, packet):
-        self.encodeplay(packet, VICTIM_AUD_FILE)
+    def send (self, packet, soundRecv):
+        print('send packet type: ' + str(packet.type) + ' seq: ' + str(packet.seq))
+        soundRecv.stop_listening()
+        self.encodeplay(packet.toString(), VICTIM_AUD_FILE)
+        soundRecv.start_listening()
 
     def getbit(self, freq):
         music = []
