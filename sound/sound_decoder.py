@@ -80,7 +80,8 @@ class Decoder:
                             # finPkt.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                             # self.packet = finPkt
 
-                            self.packet = Packet(FIN_PACKET,None,0,int(bits_string[pointer:pointer + CHECKSUM_SIZE]))
+                            self.packet = Packet(FIN_PACKET)
+                            self.packet.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                     elif(type==DATA_PACKET):
                         if(len(bits_string)> DATA_PACKET_SIZE):
                             length= int(bits_string[pointer:pointer+LEN_SIZE]) #The length field
