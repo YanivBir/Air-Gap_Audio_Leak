@@ -3,8 +3,8 @@ import huffman.freq as freq
 from sound.sound_decoder import *
 import textwrap
 
-FILE_TO_STEAL = '/home/yaniv/Desktop/AudioAlpha/tests/myCodes.txt'
-STOLEN_FILE = '/home/yaniv/Desktop/AudioAlpha/tests/hisCodes.txt'
+FILE_TO_STEAL = '/home/ofir/PycharmProjects/AudioAlpha/tests/myCodes.txt'
+STOLEN_FILE = '/home/ofir/PycharmProjects/AudioAlpha/tests/hisCodes.txt'
 
 def victim(soundSend,soundRecv):
     freq_dict = freq.relative_english_freq()
@@ -41,8 +41,8 @@ def main():
     soundSend = Encoder()
     soundRecv = Decoder()
 
-    victim(soundSend,soundRecv)
-    #attacker(soundSend,soundRecv)
+    #victim(soundSend,soundRecv)
+    attacker(soundSend,soundRecv)
 
 if __name__ == "__main__":
    main()
