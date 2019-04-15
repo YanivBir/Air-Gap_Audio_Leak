@@ -61,16 +61,16 @@ class Decoder:
                     pointer = 1 #because 'r' is the first 'bit'
                     type = int (bits_string[pointer:pointer+TYPE_SIZE]) #The type field
                     pointer+= TYPE_SIZE
-                    if(type==ACK_PACKET):
+                    if(type==PktType.ACK.value):
                         if(len(bits_string)== ACK_PACKET_SIZE):
-                            self.packet = Packet(ACK_PACKET,None,0, int(bits_string[pointer:pointer+SEQ_SIZE]))
+                            self.packet = Packet(PktType.ACK.value,None,0, int(bits_string[pointer:pointer+SEQ_SIZE]))
                             pointer += SEQ_SIZE
                             self.packet.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
-                    elif(type==FIN_PACKET):
+                    elif(type==PktType.FIN):
                         if(len(bits_string)==FIN_PACKET_SIZE):
-                            self.packet = Packet(FIN_PACKET)
+                            self.packet = Packet(PktType.FIN.value)
                             self.packet.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
-                    elif(type==DATA_PACKET):
+                    elif(type==PktType.DATA.value):
                         if(len(bits_string)> DATA_PACKET_SIZE):
                             length= int(bits_string[pointer:pointer+LEN_SIZE]) #The length field
                             pointer+= LEN_SIZE
@@ -80,39 +80,11 @@ class Decoder:
                                 checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                                 pointer+= CHECKSUM_SIZE
                                 data = bits_string[pointer:pointer + length]
-                                self.packet = Packet(DATA_PACKET, None, length, seq, data)
+                                self.packet = Packet(PktType.DATA.value, None, length, seq, data)
                                 self.packet.checksum = checksum
                     else:
                         self.bits_buffer=[]
             #self.closeChannel()
-        #return -1
-                #if (length + DATA_PACKET_SIZE == len(bits_string)):
-                #     data = getData(bits_string)
-                #     if (data==-1):
-                #         self.do_listen = False
-                #         break
-                #     if (data == CLOSE_PACKET_MARK):
-                #         self.do_listen = False
-                #     else:
-                #         self.all_data += str(data)
-                #     self.bits_buffer = []
-
-        # if (self.all_data!=''):
-        #     freq_dict = freq.relative_english_freq()
-        #     freqs = list(freq_dict.items())  # HuffmanCode requires (symbol, freq) pairs.
-        #
-        #     decimal_huffman = huffman.HuffmanCode(freqs, 10)
-        #     enc_data = decimal_huffman.decode(self.all_data) #move it from here
-
-            # move the next section from here
-            #print(enc_data)
-            #fd = open(STOLEN_FILE, 'w')
-            #fd.write(enc_data)
-            #fd.close()
-
-        #self.stream.stop_stream()
-        #self.stream.close()
-        #self.p.terminate()
 
     def closeChannel (self):
         self.stream.stop_stream()

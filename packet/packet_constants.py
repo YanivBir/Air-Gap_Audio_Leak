@@ -1,3 +1,5 @@
+from enum import Enum
+
 PACKET_RESET_SYMBOL = 'r'
 SIZE_OF_BYTE = 2
 MAX_PACKET_DIGIT = '9' # change it to high packet digit
@@ -5,13 +7,13 @@ MAX_BYTE_SIZE = int(MAX_PACKET_DIGIT*SIZE_OF_BYTE)
 MAX_PACKET_DIGITS_SIZE = int(9)
 CLOSE_PACKET_MARK = '99'
 
-#Packet types
-DATA_PACKET= 0
-ACK_PACKET = 1
-FIN_PACKET = 9
+class PktType(Enum):
+    DATA = 1
+    ACK =  2
+    FIN =  3
 
 #Fields size in bits
-TYPE_SIZE = 1
+TYPE_SIZE= 1
 LEN_SIZE = 2
 SEQ_SIZE = 1
 CHECKSUM_SIZE = 2

@@ -3,7 +3,7 @@ from packet.packet import *
 
 def calcCheckSum(pkt):
     checksum = int(pkt.type)
-    if (pkt.type == DATA_PACKET):
+    if (pkt.type == PktType.DATA.value):
         checksum+= int(pkt.len)
         checksum+= int(pkt.seq)
         i = 0
@@ -14,7 +14,7 @@ def calcCheckSum(pkt):
                 byte = pkt.data[i:i+len(pkt.data)]
             checksum+= int(byte)
             i=i+SIZE_OF_BYTE
-    elif(pkt.type == ACK_PACKET):
+    elif(pkt.type == PktType.ACK.value):
         checksum+= int(pkt.seq)
 
     checksum = int(checksum%(MAX_BYTE_SIZE))

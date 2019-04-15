@@ -45,5 +45,5 @@ UNDEFINED_STATE = STATES-1
 
 BIT_DURATION = 0.2
 IDLE_LIMIT = 20 #If we don't hear anything for a while (~2sec), clear buffer.
-RECV_TIMEOUT = 7 #In sec
+RECV_TIMEOUT = 17 #In sec
 VICTIM_AUD_FILE = '/home/yaniv/PycharmProjects/AudioAlpha/tests/victimAudio'

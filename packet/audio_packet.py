@@ -19,33 +19,33 @@ def segmentation(data):
                 part = data[i:i+MAX_PACKET_DIGITS_SIZE]
                 i+= MAX_PACKET_DIGITS_SIZE
 
-            packetsList.append(Packet(DATA_PACKET,calcCheckSum, len(part), msg_counter%MAX_PACKET_DIGITS_SIZE,part))
+            packetsList.append(Packet(PktType.DATA.value,calcCheckSum, len(part), msg_counter%MAX_PACKET_DIGITS_SIZE,part))
             msg_counter+=1
     else:
-        packetsList.append(Packet(DATA_PACKET,calcCheckSum, len(data), msg_counter % MAX_PACKET_DIGITS_SIZE, data))
+        packetsList.append(Packet(PktType.DATA.value,calcCheckSum, len(data), msg_counter % MAX_PACKET_DIGITS_SIZE, data))
         msg_counter += 1
     return packetsList
 
 def sendAudioPacket(data, soundSend,soundRecv):
     pktList= segmentation(data)
-    pktList.append(Packet(FIN_PACKET, calcCheckSum))
+    pktList.append(Packet(PktType.FIN.value, calcCheckSum))
 
     for i in pktList:
         soundSend.send(i, soundRecv)
         t0= time.perf_counter()
         while((soundRecv.recvPkt()==None)
-              or(soundRecv.recvPkt().type==DATA_PACKET)
+              or(soundRecv.recvPkt().type==PktType.DATA.value)
               or(soundRecv.recvPkt().seq != i.seq)
               or(soundRecv.recvPkt().checksum != calcCheckSum(soundRecv.recvPkt()))):
             if (time.perf_counter()-t0 > RECV_TIMEOUT):
                 soundSend.send(i, soundRecv)
                 t0= time.perf_counter()
-            if (soundRecv.recvPkt()!=None and soundRecv.recvPkt().type==DATA_PACKET):
+            if (soundRecv.recvPkt()!=None and soundRecv.recvPkt().type==PktType.DATA.value):
                 soundRecv.start_listening() #Clean recv buffers
         soundRecv.stop_listening()
-        if (soundRecv.recvPkt().type==ACK_PACKET):
+        if (soundRecv.recvPkt().type==PktType.ACK.value):
             print('recv ack for packet: ' + str(i.seq))
-        elif(soundRecv.recvPkt().type==FIN_PACKET):
+        elif(soundRecv.recvPkt().type==PktType.FIN.value):
             print('recived FIN_ACK')
     print('send packets is complete.')
 
@@ -53,17 +53,17 @@ def recvAudioPacket(soundSend,soundRecv):
     pktList = []
     soundRecv.start_listening()
     while ((soundRecv.recvPkt() == None)
-           or (soundRecv.recvPkt().type != FIN_PACKET)
+           or (soundRecv.recvPkt().type != PktType.FIN.value)
            or (soundRecv.recvPkt().checksum != calcCheckSum(soundRecv.recvPkt()))):
-        if (soundRecv.recvPkt() != None and soundRecv.recvPkt().type == DATA_PACKET):
+        if (soundRecv.recvPkt() != None and soundRecv.recvPkt().type == PktType.DATA.value):
             seqNum = soundRecv.recvPkt().seq
             print('get packet: ' + str(seqNum))
             pktList.append(soundRecv.recvPkt())
-            soundSend.send(Packet(ACK_PACKET, calcCheckSum, 0, seqNum), soundRecv)
+            soundSend.send(Packet(PktType.ACK.value, calcCheckSum, 0, seqNum), soundRecv)
     soundRecv.stop_listening()
 
-    if (soundRecv.recvPkt().type==FIN_PACKET):
-        soundSend.send(Packet(FIN_PACKET, calcCheckSum), soundRecv)
+    if (soundRecv.recvPkt().type==PktType.FIN.value):
+        soundSend.send(Packet(PktType.FIN.value, calcCheckSum), soundRecv)
 
     data = ''
     counter = 0

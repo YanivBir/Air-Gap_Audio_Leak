@@ -91,7 +91,7 @@ class Encoder:
         p.terminate()
 
     def send (self, packet, soundRecv):
-        print('send packet type: ' + str(packet.type) + ' seq: ' + str(packet.seq))
+        print('send ' + str(PktType(packet.type)) + ' seq: ' + str(packet.seq))
         soundRecv.stop_listening()
         self.encodeplay(packet.toString(), VICTIM_AUD_FILE)
         soundRecv.start_listening()

@@ -42,11 +42,11 @@ class Packet:
 
     def toString(self):
         strPkt = 'r' + str(self.type)
-        if (self.type == DATA_PACKET):
+        if (self.type == PktType.DATA.value):
             strPkt+= str(self.len).zfill(SIZE_OF_BYTE)+str(self.seq)+str(self.checksum).zfill(SIZE_OF_BYTE)+self.data
-        elif (self.type == ACK_PACKET):
+        elif (self.type == PktType.ACK.value):
             strPkt+=  str(self.seq)+ str(self.checksum).zfill(SIZE_OF_BYTE)
-        elif (self.type== FIN_PACKET):
+        elif (self.type== PktType.FIN.value):
             strPkt+= str(self.checksum).zfill(SIZE_OF_BYTE)
         strPkt+= '0'
         return strPkt
