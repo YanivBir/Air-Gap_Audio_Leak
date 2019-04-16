@@ -35,8 +35,7 @@ def sendAudioPacket(data, soundSend,soundRecv):
         t0= time.perf_counter()
         while((soundRecv.recvPkt()==None)
               or(soundRecv.recvPkt().type==PktType.DATA.value)
-              or(soundRecv.recvPkt().seq != i.seq)
-              or(soundRecv.recvPkt().checksum != calcCheckSum(soundRecv.recvPkt()))):
+              or(soundRecv.recvPkt().seq != i.seq)):
             if (time.perf_counter()-t0 > RECV_TIMEOUT):
                 soundSend.send(i, soundRecv)
                 t0= time.perf_counter()
@@ -51,15 +50,20 @@ def sendAudioPacket(data, soundSend,soundRecv):
 
 def recvAudioPacket(soundSend,soundRecv):
     pktList = []
+    t0 = time.perf_counter()
     soundRecv.start_listening()
     while ((soundRecv.recvPkt() == None)
-           or (soundRecv.recvPkt().type != PktType.FIN.value)
-           or (soundRecv.recvPkt().checksum != calcCheckSum(soundRecv.recvPkt()))):
+           or (soundRecv.recvPkt().type != PktType.FIN.value)):
         if (soundRecv.recvPkt() != None and soundRecv.recvPkt().type == PktType.DATA.value):
-            seqNum = soundRecv.recvPkt().seq
-            print('get packet: ' + str(seqNum))
+            pkt = soundRecv.recvPkt()
+            print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
+            seqNum = pkt.seq
             pktList.append(soundRecv.recvPkt())
             soundSend.send(Packet(PktType.ACK.value, calcCheckSum, 0, seqNum), soundRecv)
+            t0 = time.perf_counter()
+        # elif (time.perf_counter()-t0 > RECV_TIMEOUT-3):
+        #         soundRecv.start_listening() #clean th buffer
+        #         t0= time.perf_counter()
     soundRecv.stop_listening()
 
     if (soundRecv.recvPkt().type==PktType.FIN.value):
