@@ -56,7 +56,6 @@ def recvAudioPacket(soundSend,soundRecv):
            or (soundRecv.recvPkt().type != PktType.FIN.value)):
         if (soundRecv.recvPkt() != None and soundRecv.recvPkt().type == PktType.DATA.value):
             pkt = soundRecv.recvPkt()
-            print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
             seqNum = pkt.seq
             pktList.append(soundRecv.recvPkt())
             soundSend.send(Packet(PktType.ACK.value, calcCheckSum, 0, seqNum), soundRecv)

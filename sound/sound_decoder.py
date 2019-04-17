@@ -23,6 +23,7 @@ class Decoder:
         self.character_callback = None
         self.idle_callback = None
         self.p = pyaudio.PyAudio()
+        self.packet = None
         self.stream = self.p.open(format=pyaudio.paInt16,
                                   channels=1,
                                   rate=RATE,
@@ -32,9 +33,13 @@ class Decoder:
         listen_thread = threading.Thread(target=self.listen)
         listen_thread.start()
 
-    def listen(self):
+    def cleanBuffers (self):
         self.packet= None
         self.bits_buffer = []
+
+    def listen(self):
+        #self.packet= None
+        #self.bits_buffer = []
         while (True):
             while (self.do_listen):
                 audiostr = self.stream.read(CHUNK_SIZE)
@@ -54,7 +59,7 @@ class Decoder:
                 power.append(self.goertzel(RESET_FRQ))
                 base = self.goertzel(BASE_FRQ)
                 self.update_state(power, base)
-                self.signal_to_bits()
+                self.signal_to_bits() #add digit to self.bits_buffer
                 bits_string = ''.join(self.bits_buffer)
 
                 if (len(bits_string)>1):
@@ -68,16 +73,18 @@ class Decoder:
                             pkt.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
                             if (pkt.checksum == calcCheckSum(pkt)):
                                 self.packet = pkt
+                                # print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                             else:
-                                self.bits_buffer = []
+                                self.cleanBuffers()
                     elif(type==PktType.FIN.value):
                         if(len(bits_string)==FIN_PACKET_SIZE):
                             pkt = Packet(PktType.FIN.value)
                             pkt.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                             if (pkt.checksum == calcCheckSum(pkt)):
                                 self.packet = pkt
+                                # print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                             else:
-                                self.bits_buffer = []
+                                self.cleanBuffers()
                     elif(type==PktType.DATA.value):
                         if(len(bits_string)> DATA_PACKET_SIZE):
                             length= int(bits_string[pointer:pointer+LEN_SIZE]) #The length field
@@ -93,9 +100,9 @@ class Decoder:
                                 if (pkt.checksum == calcCheckSum(pkt)):
                                     self.packet = pkt
                                 else:
-                                    self.bits_buffer = []
+                                    self.cleanBuffers()
                     else:
-                        self.bits_buffer=[]
+                        self.cleanBuffers()
             #self.closeChannel()
 
     def closeChannel (self):
@@ -110,8 +117,7 @@ class Decoder:
         self.idle_callback = func
 
     def start_listening(self):
-        self.bits_buffer = []
-        self.packet = None
+        self.cleanBuffers()
         self.do_listen = True
 
     def stop_listening(self):
@@ -119,9 +125,6 @@ class Decoder:
 
     def recvPkt(self):
         return self.packet
-
-    def cleanRecvPkt(self):
-        self.packet = None
 
     # Takes the raw noisy samples of -1/0/1 and finds the bitstream from it
     def signal_to_bits(self):
@@ -156,7 +159,8 @@ class Decoder:
         elif signal == REST_STATE:
             #for bit in self.bits_buffer:
             #    print(bit, end='', flush=True)
-            self.bits_buffer = []
+            # self.bits_buffer = []
+            self.cleanBuffers()
             self.bits_buffer.append('r')
         # If we get no signal, increment idlecount if we are idling
         if signal == UNDEFINED_STATE:
