@@ -71,7 +71,7 @@ class Decoder:
                             pkt.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
                             if (pkt.checksum == calcCheckSum(pkt)):
                                 self.packet = pkt
-                                # print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
+                                #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                             else:
                                 self.cleanBuffers()
                     elif(type==PktType.FIN.value):
@@ -82,7 +82,7 @@ class Decoder:
                             pkt.side = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                             if (pkt.checksum == calcCheckSum(pkt)):
                                 self.packet = pkt
-                                # print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
+                                #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                             else:
                                 self.cleanBuffers()
                     elif(type==PktType.DATA.value):
