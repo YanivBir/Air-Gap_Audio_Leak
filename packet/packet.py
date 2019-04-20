@@ -2,11 +2,12 @@ from packet.packet_constants import *
 from packet.err_detection import *
 
 class Packet:
-    def __init__(self, type,checksumFunc=None, len=0, seq=0, data=''):
+    def __init__(self, type,checksumFunc=None, len=0, seq=0, data='', side=0):
         self._type =type
         self._len = len
         self._seq = seq
         self._data = data
+        self._side = side
         if (checksumFunc!=None):
             self._checksum = checksumFunc(self)
 
@@ -40,6 +41,12 @@ class Packet:
         self._data = data
     data = property(get_data, set_data)
 
+    def get_side(self):
+        return self._side
+    def set_side(self, side):
+        self._side = side
+    side = property(get_side, set_side)
+
     def toString(self):
         strPkt = 'r' + str(self.type)
         if (self.type == PktType.DATA.value):
@@ -47,6 +54,6 @@ class Packet:
         elif (self.type == PktType.ACK.value):
             strPkt+=  str(self.seq)+ str(self.checksum).zfill(SIZE_OF_BYTE)
         elif (self.type== PktType.FIN.value):
-            strPkt+= str(self.checksum).zfill(SIZE_OF_BYTE)
+            strPkt+= str(self.checksum).zfill(SIZE_OF_BYTE)+ str(self.side)
         strPkt+= '0'
         return strPkt

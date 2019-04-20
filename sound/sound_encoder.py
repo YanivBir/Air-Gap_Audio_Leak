@@ -21,7 +21,6 @@ class Encoder:
                                   frames_per_buffer=AUDIOBUF_SIZE)
 
     def string2sound(self, binform):
-        #print('binform : ' + binform)
         soundlist = []
         for b in binform:
             if (b is '0'):

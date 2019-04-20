@@ -16,6 +16,11 @@ def calcCheckSum(pkt):
             i=i+SIZE_OF_BYTE
     elif(pkt.type == PktType.ACK.value):
         checksum+= int(pkt.seq)
+    elif(pkt.type == PktType.FIN.value):
+        checksum+= int (pkt.side)
+    else:
+        print('checksum() error type')
+        return -1
 
     checksum = int(checksum%(MAX_BYTE_SIZE))
     return checksum

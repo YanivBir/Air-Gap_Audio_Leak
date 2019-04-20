@@ -38,8 +38,6 @@ class Decoder:
         self.bits_buffer = []
 
     def listen(self):
-        #self.packet= None
-        #self.bits_buffer = []
         while (True):
             while (self.do_listen):
                 audiostr = self.stream.read(CHUNK_SIZE)
@@ -80,6 +78,8 @@ class Decoder:
                         if(len(bits_string)==FIN_PACKET_SIZE):
                             pkt = Packet(PktType.FIN.value)
                             pkt.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
+                            pointer += CHECKSUM_SIZE
+                            pkt.side = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                             if (pkt.checksum == calcCheckSum(pkt)):
                                 self.packet = pkt
                                 # print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())

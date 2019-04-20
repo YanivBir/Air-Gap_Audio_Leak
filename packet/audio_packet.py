@@ -18,7 +18,6 @@ def segmentation(data):
             else:
                 part = data[i:i+MAX_PACKET_DIGITS_SIZE]
                 i+= MAX_PACKET_DIGITS_SIZE
-
             packetsList.append(Packet(PktType.DATA.value,calcCheckSum, len(part), msg_counter%MAX_PACKET_DIGITS_SIZE,part))
             msg_counter+=1
     else:
@@ -28,7 +27,7 @@ def segmentation(data):
 
 def sendAudioPacket(data, soundSend,soundRecv):
     pktList= segmentation(data)
-    pktList.append(Packet(PktType.FIN.value, calcCheckSum))
+    pktList.append(Packet(PktType.FIN.value, calcCheckSum, PktSide.VICTIM.value))
 
     for i in pktList:
         soundSend.send(i, soundRecv)
@@ -44,7 +43,7 @@ def sendAudioPacket(data, soundSend,soundRecv):
         soundRecv.stop_listening()
         if (soundRecv.recvPkt().type==PktType.ACK.value):
             print('recv ack for packet: ' + str(i.seq))
-        elif(soundRecv.recvPkt().type==PktType.FIN.value):
+        elif(soundRecv.recvPkt().type==PktType.FIN.value) and (soundRecv.recvPkt().side == PktSide.ATTACKER.value):
             print('recived FIN_ACK')
     print('send packets is complete.')
 
@@ -54,7 +53,7 @@ def recvAudioPacket(soundSend,soundRecv):
     soundRecv.start_listening()
     while ((soundRecv.recvPkt() == None)
            or (soundRecv.recvPkt().type != PktType.FIN.value)):
-        if (soundRecv.recvPkt() != None and soundRecv.recvPkt().type == PktType.DATA.value):
+        if ((soundRecv.recvPkt() != None) and (soundRecv.recvPkt().type == PktType.DATA.value)):
             pkt = soundRecv.recvPkt()
             seqNum = pkt.seq
             pktList.append(soundRecv.recvPkt())
@@ -65,8 +64,8 @@ def recvAudioPacket(soundSend,soundRecv):
         #         t0= time.perf_counter()
     soundRecv.stop_listening()
 
-    if (soundRecv.recvPkt().type==PktType.FIN.value):
-        soundSend.send(Packet(PktType.FIN.value, calcCheckSum), soundRecv)
+    if ((soundRecv.recvPkt().type==PktType.FIN.value) and (soundRecv.recvPkt().side == PktSide.VICTIM.value)):
+        soundSend.send(Packet(PktType.FIN.value, calcCheckSum, PktSide.ATTACKER.value), soundRecv)
 
     data = ''
     counter = 0
