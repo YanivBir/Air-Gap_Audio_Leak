@@ -61,7 +61,9 @@ class Decoder:
                 self.signal_to_bits() #add digit to self.bits_buffer
                 bits_string = ''.join(self.bits_buffer)
 
-                if (len(bits_string)>1) and (self.lastPktTransmit!= bits_string):
+                if (self.lastPktTransmit==bits_string):
+                    self.bits_buffer = []
+                elif (len(bits_string)>1):
                     pointer = 1 #because 'r' is the first 'bit'
                     type = int (bits_string[pointer:pointer+TYPE_SIZE]) #The type field
                     pointer+= TYPE_SIZE
