@@ -29,6 +29,7 @@ class Decoder:
                                   rate=RATE,
                                   input=True,
                                   frames_per_buffer=AUDIOBUF_SIZE)
+        self.lastPktTransmit =''
         self.do_listen = False
         listen_thread = threading.Thread(target=self.listen)
         listen_thread.start()
@@ -60,7 +61,7 @@ class Decoder:
                 self.signal_to_bits() #add digit to self.bits_buffer
                 bits_string = ''.join(self.bits_buffer)
 
-                if (len(bits_string)>1):
+                if (len(bits_string)>1) and (self.lastPktTransmit!= bits_string):
                     pointer = 1 #because 'r' is the first 'bit'
                     type = int (bits_string[pointer:pointer+TYPE_SIZE]) #The type field
                     pointer+= TYPE_SIZE
@@ -71,6 +72,7 @@ class Decoder:
                             pkt.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
                             if (pkt.checksum == calcCheckSum(pkt)):
                                 self.packet = pkt
+                                self.bits_buffer = []
                                 #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                             else:
                                 self.cleanBuffers()
@@ -82,6 +84,7 @@ class Decoder:
                             pkt.side = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                             if (pkt.checksum == calcCheckSum(pkt)):
                                 self.packet = pkt
+                                self.bits_buffer = []
                                 #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                             else:
                                 self.cleanBuffers()
@@ -99,6 +102,7 @@ class Decoder:
                                 pkt.checksum = checksum
                                 if (pkt.checksum == calcCheckSum(pkt)):
                                     self.packet = pkt
+                                    self.bits_buffer = []
                                 else:
                                     self.cleanBuffers()
                     else:
@@ -125,6 +129,12 @@ class Decoder:
 
     def recvPkt(self):
         return self.packet
+
+    def get_last_pkt(self):
+        return self.lastPktTransmit
+    def set_last_pkt(self, typed):
+        self.lastPktTransmit = typed
+    type = property(get_last_pkt, set_last_pkt)
 
     # Takes the raw noisy samples of -1/0/1 and finds the bitstream from it
     def signal_to_bits(self):
