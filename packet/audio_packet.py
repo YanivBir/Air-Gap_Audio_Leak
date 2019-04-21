@@ -58,6 +58,7 @@ def recvAudioPacket(soundSend,soundRecv):
             pktList.append(rcvPkt)
             print('recv ' + str(PktType(rcvPkt.type)) + ' seq: ' + str(rcvPkt.seq) + '|' + rcvPkt.toString())
             soundSend.send(Packet(PktType.ACK.value, calcCheckSum, 0, rcvPkt.seq), soundRecv)
+            soundRecv.cleanBuffers()
             t0 = time.perf_counter()
         elif (rcvPkt != None) and (rcvPkt.type==PktType.FIN.value):
             print('recv ' + str(PktType(rcvPkt.type)) + ' from side: ' + str(PktSide(rcvPkt.side)) + '|' + rcvPkt.toString())

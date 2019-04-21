@@ -29,6 +29,7 @@ class Decoder:
                                   rate=RATE,
                                   input=True,
                                   frames_per_buffer=AUDIOBUF_SIZE)
+        # self.stream.close()
         self.lastPktTransmit =''
         self.do_listen = False
         listen_thread = threading.Thread(target=self.listen)
@@ -60,8 +61,9 @@ class Decoder:
                 self.update_state(power, base)
                 self.signal_to_bits() #add digit to self.bits_buffer
                 bits_string = ''.join(self.bits_buffer)
-
-                if (self.lastPktTransmit==bits_string):
+                if (bits_string!=''):
+                    print(bits_string)
+                if (bits_string!='' and (self.lastPktTransmit==bits_string or self.lastPktTransmit==bits_string+'0')):
                     self.bits_buffer = []
                 elif (len(bits_string)>1):
                     pointer = 1 #because 'r' is the first 'bit'
@@ -77,6 +79,7 @@ class Decoder:
                                 self.packet = pkt
                                 #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                             else:
+                                print('checksum error|' + pkt.toString())
                                 self.cleanBuffers()
                     elif(type==PktType.FIN.value):
                         if(len(bits_string)==FIN_PACKET_SIZE):
@@ -89,6 +92,7 @@ class Decoder:
                                 self.packet = pkt
                                 #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                             else:
+                                print('checksum error|' + pkt.toString())
                                 self.cleanBuffers()
                     elif(type==PktType.DATA.value):
                         if(len(bits_string)> DATA_PACKET_SIZE):
@@ -106,6 +110,7 @@ class Decoder:
                                     self.bits_buffer = []
                                     self.packet = pkt
                                 else:
+                                    print('checksum error|' + pkt.toString())
                                     self.cleanBuffers()
                     else:
                         self.cleanBuffers()
@@ -128,6 +133,14 @@ class Decoder:
 
     def stop_listening(self):
         self.do_listen = False
+
+    def stop_stream(self):
+        self.do_listen = False
+        self.stream.stop_stream()
+
+    def start_stream(self):
+        self.stream.start_stream()
+        self.do_listen = True
 
     def recvPkt(self):
         return self.packet

@@ -1,4 +1,5 @@
 import wave
+from time import sleep
 
 import numpy as np
 import pyaudio
@@ -92,9 +93,12 @@ class Encoder:
     def send (self, packet, soundRecv):
         soundRecv.set_last_pkt(packet.toString())
         print('send ' + str(PktType(packet.type)) +' seq: ' + str(packet.seq)+'|'+packet.toString())
-        soundRecv.stop_listening()
+        # soundRecv.stop_listening()
+        soundRecv.stop_stream()
         self.encodeplay(packet.toString(), VICTIM_AUD_FILE)
-        soundRecv.start_listening()
+        soundRecv.start_stream()
+        # sleep(1)
+        # soundRecv.start_listening()
 
     def getbit(self, freq):
         music = []
