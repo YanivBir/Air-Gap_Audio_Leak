@@ -11,15 +11,7 @@ from sound.sound_decoder import *
 
 class Encoder:
     def __init__(self):
-        #self.num_channels = 1      #unused
-        #self.bits_per_sample = 16  #unused
-        #self.amplitude = 0.5       #unused
-        self.p = pyaudio.PyAudio()
-        self.stream = self.p.open(format=pyaudio.paInt16,
-                                  channels=1,
-                                  rate=RATE,
-                                  output=True,
-                                  frames_per_buffer=AUDIOBUF_SIZE)
+        pass
 
     def string2sound(self, binform):
         soundlist = []
@@ -51,54 +43,47 @@ class Encoder:
             soundlist = np.hstack((soundlist, self.getbit(freq)))
         return soundlist
 
-    # def encode2wav(self, somestring, filename):
-    #     soundlist = self.string2sound(somestring)
-    #     wavfile.write(filename, RATE, soundlist.astype(np.dtype('int16')))
-
     def encodeplay(self, somestring, filename):
         soundlist = self.string2sound(somestring)
         wavfile.write(filename, RATE, soundlist.astype(np.dtype('int16')))
-        # self.stream.write(soundlist.astype(np.dtype('int16')))
 
         # open the file for reading.
         wf = wave.open(filename, 'rb')
+        try:
 
-        # create an audio object
-        p = pyaudio.PyAudio()
+            # create an audio object
+            p = pyaudio.PyAudio()
 
-        # open stream based on the wave object which has been input.
-        stream = p.open(format=
-                        p.get_format_from_width(wf.getsampwidth()),
-                        channels=wf.getnchannels(),
-                        rate=wf.getframerate(),
-                        output=True,
-                        frames_per_buffer=AUDIOBUF_SIZE)
+            # open stream based on the wave object which has been input.
+            stream = p.open(format=
+                            p.get_format_from_width(wf.getsampwidth()),
+                            channels=wf.getnchannels(),
+                            rate=wf.getframerate(),
+                            output=True,
+                            frames_per_buffer=AUDIOBUF_SIZE)
 
-        # read data (based on the chunk size)
-        data = wf.readframes(CHUNK_SIZE)
-
-        # play stream (looping from beginning of file to the end)
-        while data != b'':
-            # writing to the stream is what *actually* plays the sound.
-            stream.write(data)
+            # read data (based on the chunk size)
             data = wf.readframes(CHUNK_SIZE)
 
-        stream.write(data)
+            # play stream (looping from beginning of file to the end)
+            while data != b'':
+                # writing to the stream is what *actually* plays the sound.
+                stream.write(data)
+                data = wf.readframes(CHUNK_SIZE)
 
-        # cleanup stuff.
-        stream.stop_stream()
-        # stream.close()
-        # p.terminate()
+            stream.write(data)
+
+            # cleanup stuff.
+            stream.stop_stream()
+        except:
+            print('error at encodeplay')
 
     def send (self, packet, soundRecv):
         soundRecv.set_last_pkt(packet.toString())
         print('send ' + str(PktType(packet.type)) +' seq: ' + str(packet.seq)+'|'+packet.toString())
-        # soundRecv.stop_listening()
         soundRecv.stop_stream()
         self.encodeplay(packet.toString(), VICTIM_AUD_FILE)
         soundRecv.start_stream()
-        # sleep(1)
-        # soundRecv.start_listening()
 
     def getbit(self, freq):
         music = []
@@ -113,8 +98,3 @@ class Encoder:
             x[i] = x[i] * sigmoid[i]
         music = np.hstack((music, x))
         return music
-
-    def quit(self):
-        self.stream.stop_stream()
-        # self.stream.close()
-        # self.p.terminate()

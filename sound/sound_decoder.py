@@ -14,7 +14,15 @@ from packet.packet import *
 
 class Decoder:
     def __init__(self):
-        self.win_len = 2*int(BIT_DURATION*RATE / CHUNK_SIZE / 2)
+        self.init_stream()
+        self.packet = None
+        self.lastPktTransmit =''
+        self.do_listen = False
+        listen_thread = threading.Thread(target=self.listen)
+        listen_thread.start()
+
+    def init_stream (self):
+        self.win_len = 2 * int(BIT_DURATION * RATE / CHUNK_SIZE / 2)
         self.win_fudge = int(self.win_len / 2)
         self.buf_len = self.win_len + self.win_fudge
         self.audio_buffer = deque()
@@ -22,22 +30,15 @@ class Decoder:
         self.idlecount = 0
         self.character_callback = None
         self.idle_callback = None
-        self.p = pyaudio.PyAudio()
-        self.stream = self.p.open(format=pyaudio.paInt16,
-                                  channels=1,
-                                  rate=RATE,
-                                  input=True,
-                                  frames_per_buffer=AUDIOBUF_SIZE)
-        # self.stream.close()
-        self.packet = None
-        self.lastPktTransmit =''
-        self.do_listen = False
-        listen_thread = threading.Thread(target=self.listen)
-        listen_thread.start()
-
-    def cleanBuffers (self):
-        self.packet= None
-        self.bits_buffer = []
+        try:
+            self.p = pyaudio.PyAudio()
+            self.stream = self.p.open(format=pyaudio.paInt16,
+                                      channels=1,
+                                      rate=RATE,
+                                      input=True,
+                                      frames_per_buffer=AUDIOBUF_SIZE)
+        except:
+            print('An error occured at init_stream()')
 
     def listen(self):
         while (True):
@@ -62,8 +63,6 @@ class Decoder:
                     self.update_state(power, base)
                     self.signal_to_bits() #add digit to self.bits_buffer
                     bits_string = ''.join(self.bits_buffer)
-                    # if (bits_string!=''):
-                    #     print(bits_string)
                     if (bits_string!='' and (self.lastPktTransmit==bits_string or self.lastPktTransmit==bits_string+'0')):
                         self.bits_buffer = []
                     elif (len(bits_string)>1):
@@ -78,7 +77,6 @@ class Decoder:
                                 if (pkt.checksum == calcCheckSum(pkt)):
                                     self.bits_buffer = []
                                     self.packet = pkt
-                                    #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                                 else:
                                     print('checksum error|' + pkt.toString())
                                     self.cleanBuffers()
@@ -91,7 +89,6 @@ class Decoder:
                                 if (pkt.checksum == calcCheckSum(pkt)):
                                     self.bits_buffer = []
                                     self.packet = pkt
-                                    #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                                 else:
                                     print('checksum error|' + pkt.toString())
                                     self.cleanBuffers()
@@ -117,58 +114,12 @@ class Decoder:
                             self.cleanBuffers()
                 except:
                     pass
-            #self.closeChannel()
-
-    def closeChannel (self):
-        self.stream.stop_stream()
-        # self.stream.close()
-        # self.p.terminate()
 
     def attach_character_callback(self, func):
         self.character_callback = func
 
     def attach_idle_callback(self, func):
         self.idle_callback = func
-
-    def start_listening(self):
-        self.cleanBuffers()
-        self.do_listen = True
-
-    def stop_listening(self):
-        self.do_listen = False
-
-    def stop_stream(self):
-        self.do_listen = False
-        self.stream.stop_stream()
-        # self.stream.close()
-        # self.p.terminate()
-
-    def start_stream(self):
-        self.win_len = 2 * int(BIT_DURATION * RATE / CHUNK_SIZE / 2)
-        self.win_fudge = int(self.win_len / 2)
-        self.buf_len = self.win_len + self.win_fudge
-        self.audio_buffer = deque()
-        self.bits_buffer = []
-        self.idlecount = 0
-        self.character_callback = None
-        self.idle_callback = None
-        self.p = pyaudio.PyAudio()
-        self.stream = self.p.open(format=pyaudio.paInt16,
-                                  channels=1,
-                                  rate=RATE,
-                                  input=True,
-                                  frames_per_buffer=AUDIOBUF_SIZE)
-
-        self.do_listen = True
-
-    def recvPkt(self):
-        return self.packet
-
-    def get_last_pkt(self):
-        return self.lastPktTransmit
-    def set_last_pkt(self, typed):
-        self.lastPktTransmit = typed
-    type = property(get_last_pkt, set_last_pkt)
 
     # Takes the raw noisy samples of -1/0/1 and finds the bitstream from it
     def signal_to_bits(self):
@@ -201,9 +152,6 @@ class Decoder:
             self.bits_buffer.append(str(signal))
         # If we get a charstart signal, reset byte!
         elif signal == REST_STATE:
-            #for bit in self.bits_buffer:
-            #    print(bit, end='', flush=True)
-            # self.bits_buffer = []
             self.cleanBuffers()
             self.bits_buffer.append('r')
         # If we get no signal, increment idlecount if we are idling
@@ -241,7 +189,6 @@ class Decoder:
             state = ZERO_STATE
         elif power[REST_STATE] / base > RESET_FRQ_THRESH:
             state = REST_STATE
-        #print (int(power0 / base), int(power1 / base), int(powerC / base))
         if len(self.audio_buffer) >= self.buf_len:
             self.audio_buffer.popleft()
         self.audio_buffer.append(state)
@@ -261,3 +208,33 @@ class Decoder:
     def window(self):
         WINDOW = numpy.hamming(CHUNK_SIZE)
         self.audio = [aud * win for aud, win in zip(self.audio, WINDOW)]
+
+    def cleanBuffers(self):
+        self.packet = None
+        self.bits_buffer = []
+
+    def start_listening(self):
+        self.cleanBuffers()
+        self.do_listen = True
+
+    def stop_listening(self):
+        self.do_listen = False
+
+    def start_stream(self):
+        self.init_stream()
+        self.do_listen = True
+
+    def stop_stream(self):
+        self.do_listen = False
+        self.stream.stop_stream()
+
+    def recvPkt(self):
+        return self.packet
+
+    def get_last_pkt(self):
+        return self.lastPktTransmit
+
+    def set_last_pkt(self, typed):
+        self.lastPktTransmit = typed
+
+    type = property(get_last_pkt, set_last_pkt)

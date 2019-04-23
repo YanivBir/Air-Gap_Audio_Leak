@@ -28,7 +28,7 @@ def segmentation(data):
 def sendAudioPacket(data, soundSend,soundRecv):
     pktList = segmentation(data)
     pktList.append(Packet(PktType.FIN.value, calcCheckSum, 0, 0,'', PktSide.VICTIM.value))
-    # soundRecv.start_listening()
+    soundRecv.start_listening()
     for i in pktList:
         soundSend.send(i, soundRecv)
         t0 = time.perf_counter()
@@ -45,7 +45,7 @@ def sendAudioPacket(data, soundSend,soundRecv):
                 soundSend.send(i, soundRecv)
                 t0 = time.perf_counter()
     print('Send audio packet is complete.')
-    # soundRecv.stop_listening()
+    soundRecv.stop_listening()
 
 def recvAudioPacket(soundSend,soundRecv):
     pktList = []
