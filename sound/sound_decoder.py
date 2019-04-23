@@ -23,13 +23,13 @@ class Decoder:
         self.character_callback = None
         self.idle_callback = None
         self.p = pyaudio.PyAudio()
-        self.packet = None
         self.stream = self.p.open(format=pyaudio.paInt16,
                                   channels=1,
                                   rate=RATE,
                                   input=True,
                                   frames_per_buffer=AUDIOBUF_SIZE)
         # self.stream.close()
+        self.packet = None
         self.lastPktTransmit =''
         self.do_listen = False
         listen_thread = threading.Thread(target=self.listen)
@@ -42,84 +42,87 @@ class Decoder:
     def listen(self):
         while (True):
             while (self.do_listen):
-                audiostr = self.stream.read(CHUNK_SIZE)
-                self.audio = list(struct.unpack("%dh" % CHUNK_SIZE, audiostr))
-                self.window()
-                power = []
-                power.append(self.goertzel(ZERO_FRQ))
-                power.append(self.goertzel(ONE_FRQ))
-                power.append(self.goertzel(TWO_FRQ))
-                power.append(self.goertzel(THREE_FRQ))
-                power.append(self.goertzel(FOUR_FRQ))
-                power.append(self.goertzel(FIVE_FRQ))
-                power.append(self.goertzel(SIX_FRQ))
-                power.append(self.goertzel(SEVEN_FRQ))
-                power.append(self.goertzel(EIGHT_FRQ))
-                power.append(self.goertzel(NINE_FRQ))
-                power.append(self.goertzel(RESET_FRQ))
-                base = self.goertzel(BASE_FRQ)
-                self.update_state(power, base)
-                self.signal_to_bits() #add digit to self.bits_buffer
-                bits_string = ''.join(self.bits_buffer)
-                if (bits_string!=''):
-                    print(bits_string)
-                if (bits_string!='' and (self.lastPktTransmit==bits_string or self.lastPktTransmit==bits_string+'0')):
-                    self.bits_buffer = []
-                elif (len(bits_string)>1):
-                    pointer = 1 #because 'r' is the first 'bit'
-                    type = int (bits_string[pointer:pointer+TYPE_SIZE]) #The type field
-                    pointer+= TYPE_SIZE
-                    if(type==PktType.ACK.value):
-                        if(len(bits_string)== ACK_PACKET_SIZE):
-                            pkt = Packet(PktType.ACK.value,None,0, int(bits_string[pointer:pointer+SEQ_SIZE]))
-                            pointer += SEQ_SIZE
-                            pkt.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
-                            if (pkt.checksum == calcCheckSum(pkt)):
-                                self.bits_buffer = []
-                                self.packet = pkt
-                                #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
-                            else:
-                                print('checksum error|' + pkt.toString())
-                                self.cleanBuffers()
-                    elif(type==PktType.FIN.value):
-                        if(len(bits_string)==FIN_PACKET_SIZE):
-                            pkt = Packet(PktType.FIN.value)
-                            pkt.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
-                            pointer += CHECKSUM_SIZE
-                            pkt.side = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
-                            if (pkt.checksum == calcCheckSum(pkt)):
-                                self.bits_buffer = []
-                                self.packet = pkt
-                                #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
-                            else:
-                                print('checksum error|' + pkt.toString())
-                                self.cleanBuffers()
-                    elif(type==PktType.DATA.value):
-                        if(len(bits_string)> DATA_PACKET_SIZE):
-                            length= int(bits_string[pointer:pointer+LEN_SIZE]) #The length field
-                            pointer+= LEN_SIZE
-                            if(length+ DATA_PACKET_SIZE==len(bits_string)):
-                                seq = int(bits_string[pointer:pointer + SEQ_SIZE])
-                                pointer+= SEQ_SIZE
-                                checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
-                                pointer+= CHECKSUM_SIZE
-                                data = bits_string[pointer:pointer + length]
-                                pkt = Packet(PktType.DATA.value, None, length, seq, data)
-                                pkt.checksum = checksum
+                try:
+                    audiostr = self.stream.read(CHUNK_SIZE)
+                    self.audio = list(struct.unpack("%dh" % CHUNK_SIZE, audiostr))
+                    self.window()
+                    power = []
+                    power.append(self.goertzel(ZERO_FRQ))
+                    power.append(self.goertzel(ONE_FRQ))
+                    power.append(self.goertzel(TWO_FRQ))
+                    power.append(self.goertzel(THREE_FRQ))
+                    power.append(self.goertzel(FOUR_FRQ))
+                    power.append(self.goertzel(FIVE_FRQ))
+                    power.append(self.goertzel(SIX_FRQ))
+                    power.append(self.goertzel(SEVEN_FRQ))
+                    power.append(self.goertzel(EIGHT_FRQ))
+                    power.append(self.goertzel(NINE_FRQ))
+                    power.append(self.goertzel(RESET_FRQ))
+                    base = self.goertzel(BASE_FRQ)
+                    self.update_state(power, base)
+                    self.signal_to_bits() #add digit to self.bits_buffer
+                    bits_string = ''.join(self.bits_buffer)
+                    # if (bits_string!=''):
+                    #     print(bits_string)
+                    if (bits_string!='' and (self.lastPktTransmit==bits_string or self.lastPktTransmit==bits_string+'0')):
+                        self.bits_buffer = []
+                    elif (len(bits_string)>1):
+                        pointer = 1 #because 'r' is the first 'bit'
+                        type = int (bits_string[pointer:pointer+TYPE_SIZE]) #The type field
+                        pointer+= TYPE_SIZE
+                        if(type==PktType.ACK.value):
+                            if(len(bits_string)== ACK_PACKET_SIZE):
+                                pkt = Packet(PktType.ACK.value,None,0, int(bits_string[pointer:pointer+SEQ_SIZE]))
+                                pointer += SEQ_SIZE
+                                pkt.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
                                 if (pkt.checksum == calcCheckSum(pkt)):
                                     self.bits_buffer = []
                                     self.packet = pkt
+                                    #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
                                 else:
                                     print('checksum error|' + pkt.toString())
                                     self.cleanBuffers()
-                    else:
-                        self.cleanBuffers()
+                        elif(type==PktType.FIN.value):
+                            if(len(bits_string)==FIN_PACKET_SIZE):
+                                pkt = Packet(PktType.FIN.value)
+                                pkt.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
+                                pointer += CHECKSUM_SIZE
+                                pkt.side = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
+                                if (pkt.checksum == calcCheckSum(pkt)):
+                                    self.bits_buffer = []
+                                    self.packet = pkt
+                                    #print('recv ' + str(PktType(pkt.type)) + ' seq: ' + str(pkt.seq) + '|' + pkt.toString())
+                                else:
+                                    print('checksum error|' + pkt.toString())
+                                    self.cleanBuffers()
+                        elif(type==PktType.DATA.value):
+                            if(len(bits_string)> DATA_PACKET_SIZE):
+                                length= int(bits_string[pointer:pointer+LEN_SIZE]) #The length field
+                                pointer+= LEN_SIZE
+                                if(length+ DATA_PACKET_SIZE==len(bits_string)):
+                                    seq = int(bits_string[pointer:pointer + SEQ_SIZE])
+                                    pointer+= SEQ_SIZE
+                                    checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
+                                    pointer+= CHECKSUM_SIZE
+                                    data = bits_string[pointer:pointer + length]
+                                    pkt = Packet(PktType.DATA.value, None, length, seq, data)
+                                    pkt.checksum = checksum
+                                    if (pkt.checksum == calcCheckSum(pkt)):
+                                        self.bits_buffer = []
+                                        self.packet = pkt
+                                    else:
+                                        print('checksum error|' + pkt.toString())
+                                        self.cleanBuffers()
+                        else:
+                            self.cleanBuffers()
+                except:
+                    pass
             #self.closeChannel()
 
     def closeChannel (self):
         self.stream.stop_stream()
-        self.stream.close()
-        self.p.terminate()
+        # self.stream.close()
+        # self.p.terminate()
 
     def attach_character_callback(self, func):
         self.character_callback = func
@@ -137,9 +140,25 @@ class Decoder:
     def stop_stream(self):
         self.do_listen = False
         self.stream.stop_stream()
+        # self.stream.close()
+        # self.p.terminate()
 
     def start_stream(self):
-        self.stream.start_stream()
+        self.win_len = 2 * int(BIT_DURATION * RATE / CHUNK_SIZE / 2)
+        self.win_fudge = int(self.win_len / 2)
+        self.buf_len = self.win_len + self.win_fudge
+        self.audio_buffer = deque()
+        self.bits_buffer = []
+        self.idlecount = 0
+        self.character_callback = None
+        self.idle_callback = None
+        self.p = pyaudio.PyAudio()
+        self.stream = self.p.open(format=pyaudio.paInt16,
+                                  channels=1,
+                                  rate=RATE,
+                                  input=True,
+                                  frames_per_buffer=AUDIOBUF_SIZE)
+
         self.do_listen = True
 
     def recvPkt(self):

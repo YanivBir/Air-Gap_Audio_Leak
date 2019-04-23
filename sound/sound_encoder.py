@@ -87,8 +87,8 @@ class Encoder:
 
         # cleanup stuff.
         stream.stop_stream()
-        stream.close()
-        p.terminate()
+        # stream.close()
+        # p.terminate()
 
     def send (self, packet, soundRecv):
         soundRecv.set_last_pkt(packet.toString())
@@ -116,5 +116,5 @@ class Encoder:
 
     def quit(self):
         self.stream.stop_stream()
-        self.stream.close()
-        self.p.terminate()
+        # self.stream.close()
+        # self.p.terminate()
