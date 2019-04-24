@@ -1,6 +1,5 @@
 import wave
 from time import sleep
-
 import numpy as np
 import pyaudio
 from scipy.io import wavfile

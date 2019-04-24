@@ -8,8 +8,6 @@ import sys
 import threading
 from sound.sound_constants import *
 from packet.audio_packet import *
-import huffman.huffman as huffman
-import huffman.freq as freq
 from packet.packet import *
 
 class Decoder:
@@ -33,7 +31,7 @@ class Decoder:
         try:
             self.p = pyaudio.PyAudio()
             self.stream = self.p.open(format=pyaudio.paInt16,
-                                      channels=1,
+                                      channels=CHANNELS,
                                       rate=RATE,
                                       input=True,
                                       frames_per_buffer=AUDIOBUF_SIZE)
@@ -233,8 +231,6 @@ class Decoder:
 
     def get_last_pkt(self):
         return self.lastPktTransmit
-
     def set_last_pkt(self, typed):
         self.lastPktTransmit = typed
-
     type = property(get_last_pkt, set_last_pkt)
