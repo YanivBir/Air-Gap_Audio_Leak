@@ -77,12 +77,12 @@ class Encoder:
         except:
             print('error at encodeplay')
 
-    def send (self, packet, soundRecv):
-        soundRecv.set_last_pkt(packet.toString())
-        print('send ' + str(PktType(packet.type)) +' seq: ' + str(packet.seq)+'|'+packet.toString())
-        soundRecv.stop_stream()
-        self.encodeplay(packet.toString(), VICTIM_AUD_FILE)
-        soundRecv.start_stream()
+    def send (self, packet, sound_recv):
+        sound_recv.set_last_pkt(packet.to_string())
+        print('send ' + str(PktType(packet.type)) +' seq: ' + str(packet.seq)+'|'+packet.to_string())
+        sound_recv.stop_stream()
+        self.encodeplay(packet.to_string(), VICTIM_AUD_FILE)
+        sound_recv.start_stream()
 
     def getbit(self, freq):
         music = []

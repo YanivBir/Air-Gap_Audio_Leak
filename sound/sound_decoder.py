@@ -14,7 +14,7 @@ class Decoder:
     def __init__(self):
         self.init_stream()
         self.packet = None
-        self.lastPktTransmit =''
+        self.last_pkt_transmit =''
         self.do_listen = False
         listen_thread = threading.Thread(target=self.listen)
         listen_thread.start()
@@ -61,36 +61,36 @@ class Decoder:
                     self.update_state(power, base)
                     self.signal_to_bits() #add digit to self.bits_buffer
                     bits_string = ''.join(self.bits_buffer)
-                    if (bits_string!='' and (self.lastPktTransmit==bits_string or self.lastPktTransmit==bits_string+'0')):
+                    if (bits_string!='' and (self.last_pkt_transmit==bits_string or self.last_pkt_transmit==bits_string+'0')):
                         self.bits_buffer = []
                     elif (len(bits_string)>1):
                         pointer = 1 #because 'r' is the first 'bit'
                         type = int (bits_string[pointer:pointer+TYPE_SIZE]) #The type field
                         pointer+= TYPE_SIZE
-                        if(type==PktType.ACK.value):
+                        if(type == PktType.ACK.value):
                             if(len(bits_string)== ACK_PACKET_SIZE):
                                 pkt = Packet(PktType.ACK.value,None,0, int(bits_string[pointer:pointer+SEQ_SIZE]))
                                 pointer += SEQ_SIZE
                                 pkt.checksum = int(bits_string[pointer:pointer+CHECKSUM_SIZE])
-                                if (pkt.checksum == calcCheckSum(pkt)):
+                                if (pkt.checksum == calc_checksum(pkt)):
                                     self.bits_buffer = []
                                     self.packet = pkt
                                 else:
-                                    print('checksum error|' + pkt.toString())
+                                    print('checksum error|' + pkt.to_string())
                                     self.cleanBuffers()
-                        elif(type==PktType.FIN.value):
+                        elif(type == PktType.FIN.value):
                             if(len(bits_string)==FIN_PACKET_SIZE):
                                 pkt = Packet(PktType.FIN.value)
                                 pkt.checksum = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
                                 pointer += CHECKSUM_SIZE
                                 pkt.side = int(bits_string[pointer:pointer + CHECKSUM_SIZE])
-                                if (pkt.checksum == calcCheckSum(pkt)):
+                                if (pkt.checksum == calc_checksum(pkt)):
                                     self.bits_buffer = []
                                     self.packet = pkt
                                 else:
-                                    print('checksum error|' + pkt.toString())
+                                    print('checksum error|' + pkt.to_string())
                                     self.cleanBuffers()
-                        elif(type==PktType.DATA.value):
+                        elif(type == PktType.DATA.value):
                             if(len(bits_string)> DATA_PACKET_SIZE):
                                 length= int(bits_string[pointer:pointer+LEN_SIZE]) #The length field
                                 pointer+= LEN_SIZE
@@ -102,11 +102,11 @@ class Decoder:
                                     data = bits_string[pointer:pointer + length]
                                     pkt = Packet(PktType.DATA.value, None, length, seq, data)
                                     pkt.checksum = checksum
-                                    if (pkt.checksum == calcCheckSum(pkt)):
+                                    if (pkt.checksum == calc_checksum(pkt)):
                                         self.bits_buffer = []
                                         self.packet = pkt
                                     else:
-                                        print('checksum error|' + pkt.toString())
+                                        print('checksum error|' + pkt.to_string())
                                         self.cleanBuffers()
                         else:
                             self.cleanBuffers()
@@ -226,11 +226,11 @@ class Decoder:
         self.do_listen = False
         self.stream.stop_stream()
 
-    def recvPkt(self):
+    def rcv_pkt(self):
         return self.packet
 
     def get_last_pkt(self):
-        return self.lastPktTransmit
+        return self.last_pkt_transmit
     def set_last_pkt(self, typed):
-        self.lastPktTransmit = typed
+        self.last_pkt_transmit = typed
     type = property(get_last_pkt, set_last_pkt)

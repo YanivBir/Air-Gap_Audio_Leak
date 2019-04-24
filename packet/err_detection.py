@@ -1,7 +1,7 @@
 from packet.packet_constants import *
 from packet.packet import *
 
-def calcCheckSum(pkt):
+def calc_checksum(pkt):
     checksum = int(pkt.type)
     if (pkt.type == PktType.DATA.value):
         checksum+= int(pkt.len)

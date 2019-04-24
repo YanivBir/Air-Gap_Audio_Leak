@@ -26,7 +26,6 @@ def huffman_initial_count(message_count, digits):
     :digits: Integer >= 2 representing how many digits are to be used in codes.
     :returns: The number of messages that _must_ be grouped in the first level
               to form a `digit`-ary Huffman tree.
-
     """
 
     if message_count <= 0:
@@ -55,26 +54,21 @@ def combine_and_replace(nodes, n):
     :nodes: A list of TreeNodes.
     :n: Integer < len(nodes).
     :returns: Low-to-high list that combines the last n nodes into one.
-
     """
     group = nodes[:n]
     combined = TreeNode(sum(node.key for node in group), None, group)
     nodes = nodes[n:]
     bisect.insort(nodes, combined)
-
     return nodes
 
 def huffman_nary_tree(probabilities, digits):
     """Return a Huffman tree using the given number of digits.
-
     This `digits`-ary tree is always possible to create. See ./notes.md.
-
     :probabilities: List of tuples (symbol, probability) where probability is
                     any floating point and symbol is any object.
     :digits: Integral number of digits to use in the Huffman encoding. Must be
              at least two.
     :returns: TreeNode that is the root of the Huffman tree.
-
     """
     if digits <= 1:
         raise ValueError("must have at least 2 digits!")
@@ -88,7 +82,6 @@ def huffman_nary_tree(probabilities, digits):
         #     print("The probabilities sum to {} (!= 1)...".format(freq))
         # if math.isclose(probabilities[0].key, 1.0):
         #     print("(but they are close)")
-
         return TreeNode(freq, symbol)
 
     # TreeNode does rich comparison on key value (probability), so we can
@@ -115,7 +108,6 @@ def huffman_nary_tree(probabilities, digits):
 
 def indicies_to_code(path, digits):
     """Convert the path into a string.
-
      We join the indices directly, from most to least significant, keeping
      leading zeroes.
      Examples:
@@ -131,7 +123,6 @@ def indicies_to_code(path, digits):
             raise ValueError("cannot have an index greater than the number of digits!")
 
         combination += baseN(index, digits)
-
     return combination
 
 def huffman_nary_dict(probabilities, digits):
@@ -171,30 +162,24 @@ def huffman_nary_dict(probabilities, digits):
     root = huffman_nary_tree(probabilities, digits)
     decoding_dict = dict()
     visit(root, [], decoding_dict)
-
     return decoding_dict
 
 def inverse_dict(original):
     """Return a dictionary that is the inverse of the original.
-
     Given the pair original[key] = value, the returned dictionary will give
     ret[value] = key. It is important to keep two separate dictionaries in case
     there is key/value collision. Trying to insert a value that matches a key
     as a key will overwrite the old key.
-
     Example:
         original = {"a": "b", "foo": "a"}
         original["a"] = "foo" # Lost pair {"a": "b"}.
 
     :original: Dictionary.
     :returns: Inverse dictionary of `original`.
-
     """
     ret = dict()
-
     for key, value in original.items():
         ret[value] = key
-
     return ret
 
 # http://stackoverflow.com/a/2267428
@@ -203,10 +188,8 @@ def baseN(num,b,numerals="0123456789abcdefghijklmnopqrstuvwxyz"):
 
 def ascii_encode(string):
     """Return the 8-bit ascii representation of `string` as a string.
-
     :string: String.
     :returns: String.
-
     """
     def pad(num):
         binary = baseN(num, 2)
@@ -215,12 +198,10 @@ def ascii_encode(string):
     return "".join(pad(ord(c)) for c in string)
 
 class HuffmanCode(object):
-
     """Encode and decode messages with a constructed Huffman code."""
 
     def __init__(self, probabilities, digits):
         """Create the Huffman dictionaries needed for encoding and decoding.
-
         :probabilities: List of (message, frequency) tuples.
         :digits: Number of digits to use in the Huffman encoding.
 
@@ -231,24 +212,18 @@ class HuffmanCode(object):
 
     def encode(self, messages):
         """Encode each item in `messages` with the stored Huffman code.
-
         Raises a KeyError if there is a message in `messages` that is not in
         the inverse Huffman dictionary.
-
         :messages: List of messages to be encoded.
         :returns: String of digits that represents Huffman encoding.
-
         """
         return "".join(self.inv_huffman[message] for message in messages)
 
     def decode(self, string):
         """Decode the given string with the stored Huffman dictionary.
-
         :string: String encoded with the stored inverse Huffman dictionary.
         :returns: String.
-
         """
-
         decode = ""
         while string:
             # Huffman codes are prefix free, so read until we find a code.
@@ -258,5 +233,4 @@ class HuffmanCode(object):
             code = string[:index]
             decode += self.huffman[code]
             string = string[index:]
-
         return decode
