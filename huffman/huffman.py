@@ -260,24 +260,3 @@ class HuffmanCode(object):
             string = string[index:]
 
         return decode
-
-if __name__ == "__main__":
-    from huffman.freq import str_freq
-    with open("test.txt") as f:
-        in_str = f.read()
-
-    freqs = str_freq(in_str)
-    probabilities = list(freqs.items())
-
-    root = huffman_nary_tree(probabilities, 2)
-    huffman = HuffmanCode(probabilities, 2)
-    alt_root = huffman_nary_tree(probabilities, 16)
-    alt_huffman = HuffmanCode(probabilities, 16)
-
-    print(alt_huffman.encode(in_str))
-    print()
-    print(huffman.encode(in_str))
-    print()
-    print(ascii_encode(in_str))
-    print()
-    print(alt_huffman.decode(alt_huffman.encode(in_str)))
