@@ -57,3 +57,13 @@ class Packet:
             strPkt+= str(self.checksum).zfill(SIZE_OF_BYTE)+ str(self.side)
         strPkt+= '0'
         return strPkt
+
+    def to_byte_array(self):
+        strPkt = str(self.type)
+        if (self.type == PktType.DATA.value):
+            strPkt += str(self.len).zfill(SIZE_OF_BYTE) + str(self.seq) + self.data
+        elif (self.type == PktType.ACK.value):
+            strPkt += str(self.seq)
+        elif (self.type == PktType.FIN.value):
+            strPkt += str(self.side)
+        return bytes(strPkt, "utf-8")
