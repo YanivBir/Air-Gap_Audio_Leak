@@ -47,4 +47,4 @@ BIT_DURATION = 0.2
 IDLE_LIMIT = 20 #If we don't hear anything for a while (~2sec), clear buffer.
 CHANNELS = 1
 RECV_TIMEOUT = 15 #In sec
-VICTIM_AUD_FILE = '/home/yaniv/PycharmProjects/AudioAlpha/tests/victimAudio'
+VICTIM_AUD_FILE = '/home/yaniv/PycharmProjects/AudioAlpha/data/dataAudio'

