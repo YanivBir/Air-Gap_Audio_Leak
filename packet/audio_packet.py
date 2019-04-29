@@ -33,7 +33,7 @@ def sendAudioPacket(data, sound_send, sound_recv):
         sound_send.send(i, sound_recv)
         t0 = time.perf_counter()
         ack = 0
-        while(ack==0):
+        while(ack == 0):
             rcv_pkt = sound_recv.rcv_pkt()
             if (rcv_pkt != None) and (rcv_pkt.type == PktType.ACK.value) and (rcv_pkt.seq == i.seq):
                 ack = 1
@@ -51,7 +51,7 @@ def recvAudioPacket(sound_send,sound_recv):
     pkt_list = []
     fin = 0
     sound_recv.start_listening()
-    while (fin==0):
+    while (fin == 0):
         rcv_pkt = sound_recv.rcv_pkt()
         if (rcv_pkt != None) and (rcv_pkt.type==PktType.DATA.value):
             pkt_list.append(rcv_pkt)
@@ -67,7 +67,7 @@ def recvAudioPacket(sound_send,sound_recv):
     data = ''
     counter = 0
     for i in pkt_list:
-        if (i.seq== counter):
+        if (i.seq == counter):
             data += i.data
             counter+=1
     print('recv is complete. data is:')
