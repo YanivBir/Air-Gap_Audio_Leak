@@ -35,7 +35,7 @@ def sendAudioPacket(data, sound_send, sound_recv):
         exit = 0
         while(exit == 0):
             rcv_pkt = sound_recv.rcv_pkt()
-            if (rcv_pkt != None) and (rcv_pkt.type == PktType.ACK.value) and (i.type== rcv_pkt.type)and (rcv_pkt.seq == i.seq):
+            if (rcv_pkt != None) and (rcv_pkt.type == PktType.ACK.value) and (i.type== PktType.DATA.value) and (rcv_pkt.seq == i.seq):
                 exit = 1
                 print('recv ' + str(PktType(rcv_pkt.type)) + ' seq: ' + str(rcv_pkt.seq) + '|' + rcv_pkt.to_string())
             elif (rcv_pkt != None) and (rcv_pkt.type == PktType.FIN.value)and (i.type== rcv_pkt.type) and (rcv_pkt.side == PktSide.ATTACKER.value):

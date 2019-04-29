@@ -9,7 +9,10 @@ def calc_checksum(pkt):
     left = 0
     if (checksum_str[:2]!=''):
         left = int(checksum_str[:2])
-    return (right^left)
+    checksum = right^left
+    if (abs(checksum/10 - checksum%10) < 2 ):
+        checksum += 2
+    return (checksum)
 
 def bsd_checksum(pkt):
     data = pkt.to_byte_array()
