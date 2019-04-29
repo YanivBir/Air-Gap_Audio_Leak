@@ -3,8 +3,8 @@ import huffman.freq as freq
 from sound.sound_decoder import *
 import textwrap
 
-FILE_TO_STEAL = '/home/yaniv/PycharmProjects/AudioAlpha/data/myCodes.txt'
-STOLEN_FILE = '/home/yaniv/PycharmProjects/AudioAlpha/data/hisCodes.txt'
+FILE_TO_STEAL = '/home/yaniv/PycharmProjects/AudioAlpha/data/my_codes.txt'
+STOLEN_FILE = '/home/yaniv/PycharmProjects/AudioAlpha/data/his_codes.txt'
 
 def victim(sound_send,sound_recv):
     with open(FILE_TO_STEAL) as f:
