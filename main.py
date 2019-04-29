@@ -28,9 +28,9 @@ def attacker(sound_send,sound_recv):
         print('attacker() got huffman_data null')
 
 def main():
-    leak_time = datetime.time(LEAK_TIME_HOUR, LEAK_TIME_MIN, 00)
-    while (datetime.datetime.now().time() < leak_time):
-        pass
+    # leak_time = datetime.time(LEAK_TIME_HOUR, LEAK_TIME_MIN, 00)
+    # while (datetime.datetime.now().time() < leak_time):
+    #     pass
     sound_send = Encoder()
     sound_recv = Decoder()
 
