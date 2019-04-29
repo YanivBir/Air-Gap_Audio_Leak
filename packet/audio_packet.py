@@ -32,14 +32,14 @@ def sendAudioPacket(data, sound_send, sound_recv):
     for i in pkt_list:
         sound_send.send(i, sound_recv)
         t0 = time.perf_counter()
-        ack = 0
-        while(ack == 0):
+        exit = 0
+        while(exit == 0):
             rcv_pkt = sound_recv.rcv_pkt()
-            if (rcv_pkt != None) and (rcv_pkt.type == PktType.ACK.value) and (rcv_pkt.seq == i.seq):
-                ack = 1
+            if (rcv_pkt != None) and (rcv_pkt.type == PktType.ACK.value) and (i.type== rcv_pkt.type)and (rcv_pkt.seq == i.seq):
+                exit = 1
                 print('recv ' + str(PktType(rcv_pkt.type)) + ' seq: ' + str(rcv_pkt.seq) + '|' + rcv_pkt.to_string())
-            elif (rcv_pkt != None) and (rcv_pkt.type == PktType.FIN.value) and (rcv_pkt.side == PktSide.ATTACKER.value):
-                ack = 1
+            elif (rcv_pkt != None) and (rcv_pkt.type == PktType.FIN.value)and (i.type== rcv_pkt.type) and (rcv_pkt.side == PktSide.ATTACKER.value):
+                exit = 1
                 print('recv ' + str(PktType(rcv_pkt.type)) + ' from side: ' + str(PktSide(rcv_pkt.side)) + '|' + rcv_pkt.to_string())
             elif (time.perf_counter()-t0 > RECV_TIMEOUT):
                 sound_send.send(i, sound_recv)
