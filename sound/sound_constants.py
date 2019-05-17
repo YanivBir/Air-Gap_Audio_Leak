@@ -43,8 +43,8 @@ NINE_STATE=  9
 REST_STATE = STATES-2
 UNDEFINED_STATE = STATES-1
 
-BIT_DURATION = 0.2
-IDLE_LIMIT = 10 #If we don't hear anything for a while (~2sec), clear buffer.
+BIT_DURATION = 0.3
+IDLE_LIMIT = 10 #If we don't hear anything for a while (~0.7sec), clear buffer.
 CHANNELS = 1
-RECV_TIMEOUT = 15 #In sec
+RECV_TIMEOUT = 20 #In sec
 VICTIM_AUD_FILE = '/home/yaniv/PycharmProjects/AudioAlpha/data/data_audio'

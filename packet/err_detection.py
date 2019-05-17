@@ -2,15 +2,8 @@ from packet.packet_constants import *
 from packet.packet import *
 
 def calc_checksum(pkt):
-    checksum_str = str(bsd_checksum(pkt))
-    right = 0
-    if (checksum_str[2:]!=''):
-        right = int (checksum_str[2:])
-    left = 0
-    if (checksum_str[:2]!=''):
-        left = int(checksum_str[:2])
-    checksum = right^left
-    return (checksum)
+    checksum = (bsd_checksum(pkt))
+    return ((checksum)%MAX_BYTE_SIZE)
 
 def bsd_checksum(pkt):
     data = pkt.to_byte_array()
