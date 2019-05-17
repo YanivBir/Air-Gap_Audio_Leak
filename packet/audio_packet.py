@@ -67,7 +67,7 @@ def recvAudioPacket(sound_send,sound_recv):
     data = ''
     counter = 0
     for i in pkt_list:
-        if (i.seq == counter):
+        if (i.seq == counter) or (i.seq%counter==0):
             data += i.data
             counter+=1
     print('recv is complete. data is:')
