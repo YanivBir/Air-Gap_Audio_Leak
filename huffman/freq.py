@@ -69,6 +69,9 @@ def relative_english_freq():
     freqs[' '] = NUMBERS_FREQ
     freqs[','] = NUMBERS_FREQ
     freqs[':'] = NUMBERS_FREQ
+    freqs['-'] = NUMBERS_FREQ
+    freqs['_'] = NUMBERS_FREQ
+    freqs[';'] = NUMBERS_FREQ
     freqs['.'] = NUMBERS_FREQ
     freqs['\n'] = NUMBERS_FREQ
 
