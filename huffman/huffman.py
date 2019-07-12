@@ -3,16 +3,18 @@ import bisect
 import huffman.freq as freq
 import math
 
-def huffman_decimal_encode(data):
+def get_decimal_huffman ():
     freq_dict = freq.relative_english_freq()
     freqs = list(freq_dict.items())  # HuffmanCode requires (symbol, freq) pairs.
     decimal_huffman = HuffmanCode(freqs, 10)
+    return decimal_huffman
+
+def huffman_decimal_encode(data):
+    decimal_huffman = get_decimal_huffman ()
     return decimal_huffman.encode(data)
 
 def huffman_decimal_decode(huffman_data):
-    freq_dict = freq.relative_english_freq()
-    freqs = list(freq_dict.items())  # HuffmanCode requires (symbol, freq) pairs.
-    decimal_huffman = HuffmanCode(freqs, 10)
+    decimal_huffman = get_decimal_huffman()
     return (decimal_huffman.decode(huffman_data))# move it from here
 
 def huffman_initial_count(message_count, digits):
