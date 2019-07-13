@@ -63,7 +63,7 @@ def recvAudioPacket(sound_send,sound_recv):
             sound_send.send(Packet(PktType.FIN.value, calc_checksum, 0, 0,'', PktSide.ATTACKER.value), sound_recv)
             fin = 1
     sound_recv.stop_listening()
-i.seq
+
     data = ''
     counter = 0
     for i in pkt_list:
