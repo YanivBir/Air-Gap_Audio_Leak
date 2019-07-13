@@ -6,7 +6,7 @@ import math
 def get_decimal_huffman ():
     freq_dict = freq.relative_english_freq()
     freqs = list(freq_dict.items())  # HuffmanCode requires (symbol, freq) pairs.
-    decimal_huffman = HuffmanCode(freqs, 10)
+    decimal_huffman = HuffmanCode(freqs, 10) #HuffmanCode(freq,digits)
     return decimal_huffman
 
 def huffman_decimal_encode(data):
@@ -15,7 +15,7 @@ def huffman_decimal_encode(data):
 
 def huffman_decimal_decode(huffman_data):
     decimal_huffman = get_decimal_huffman()
-    return (decimal_huffman.decode(huffman_data))# move it from here
+    return (decimal_huffman.decode(huffman_data))
 
 def huffman_initial_count(message_count, digits):
     """

@@ -63,11 +63,11 @@ def recvAudioPacket(sound_send,sound_recv):
             sound_send.send(Packet(PktType.FIN.value, calc_checksum, 0, 0,'', PktSide.ATTACKER.value), sound_recv)
             fin = 1
     sound_recv.stop_listening()
-
+i.seq
     data = ''
     counter = 0
     for i in pkt_list:
-        if (i.seq == counter) or (i.seq%counter==0):
+        if (i.seq == counter) or ((i.seq > 9) and (i.seq%counter==0)):
             data += i.data
             counter+=1
     print('recv is complete. data is:')
