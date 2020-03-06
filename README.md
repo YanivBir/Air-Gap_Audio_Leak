@@ -1,4 +1,5 @@
-# AudioAlpha
+# Air-Gap-Audio-Leak
+
 
 Project Goal: Leaking data from an air-Gap network to an open network, by using ultrasonic waves as an alternative communication channel.
 
